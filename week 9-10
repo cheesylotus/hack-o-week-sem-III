@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Swarupa Shinde | React Hooks Lab</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      color: #17202a;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      text-align: center;
+      padding: 55px 20px;
+    }
+    header h1 { font-size: 42px; margin-bottom: 8px; }
+    header p { margin: 5px; }
+    nav {
+      background: #111827;
+      padding: 15px;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 14px;
+      font-weight: bold;
+    }
+    main { max-width: 1100px; margin: auto; padding: 40px 20px; }
+    section { margin-bottom: 45px; }
+    h2 { color: #4f46e5; margin-bottom: 20px; text-align: center; }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 14px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.08);
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+    button {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 18px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #7c3aed; }
+    .tag {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 6px 10px;
+      border-radius: 20px;
+      margin: 5px;
+    }
+    .output {
+      background: #eef2ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      white-space: pre-line;
+    }
+    .error { color: #dc2626; }
+    .success { color: #15803d; }
+    footer {
+      text-align: center;
+      background: #111827;
+      color: white;
+      padding: 25px;
+    }
+  </style>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>Swarupa Shinde</h1>
+    <p>React Hooks and Components Lab</p>
+    <p>PRN: 25070521131</p>
+  </header>
+
+  <nav>
+    <a href="#about">About</a>
+    <a href="#components">Components</a>
+    <a href="#hooks">Hooks</a>
+  </nav>
+
+  <main id="root"></main>
+
+  <footer>
+    <p>© 2026 Swarupa Shinde| React Practical</p>
+  </footer>
+
+  <script type="text/babel">
+
+    const {
+      useState,
+      useRef,
+      useMemo,
+      useCallback,
+      useContext,
+      createContext
+    } = React;
+
+    // --------------------------------------------------
+    // useContext
+    // --------------------------------------------------
+
+    const ThemeContext = createContext();
+
+    // --------------------------------------------------
+    // Custom Hook
+    // --------------------------------------------------
+
+    function useLocalStorage(key, initialValue) {
+      const [value, setValue] = useState(() => {
+        const savedValue = localStorage.getItem(key);
+
+        return savedValue
+          ? JSON.parse(savedValue)
+          : initialValue;
+      });
+
+      const updateValue = newValue => {
+        setValue(newValue);
+        localStorage.setItem(key, JSON.stringify(newValue));
+      };
+
+      return [value, updateValue];
+    }
+
+    // --------------------------------------------------
+    // Child Component
+    // --------------------------------------------------
+
+    function SkillList({ skills, onSelectSkill }) {
+      const theme = useContext(ThemeContext);
+
+      return (
+        <div className="card">
+          <h3>Skills Component</h3>
+
+          {skills.map(skill => (
+            <button
+              key={skill}
+              onClick={() => onSelectSkill(skill)}
+              style={{
+                background: theme === "dark" ? "#111827" : "#4f46e5"
+              }}
+            >
+              {skill}
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    // --------------------------------------------------
+    // Component Composition
+    // --------------------------------------------------
+
+    function Card({ title, children }) {
+      return (
+        <div className="card">
+          <h3>{title}</h3>
+          {children}
+        </div>
+      );
+    }
+
+    // --------------------------------------------------
+    // Main App Component
+    // --------------------------------------------------
+
+    function App() {
+      const [name, setName] = useState("Aryan");
+      const [email, setEmail] = useState("");
+      const [selectedSkill, setSelectedSkill] = useState("None");
+      const [theme, setTheme] = useState("light");
+      const [count, setCount] = useState(0);
+
+      // Custom hook using localStorage
+      const [savedNote, setSavedNote] = useLocalStorage(
+        "hiral-react-note",
+        ""
+      );
+
+      // useRef: access input without re-rendering
+      const nameInputRef = useRef(null);
+
+      // useMemo: cache calculated value
+      const expensiveCalculation = useMemo(() => {
+        console.log("Calculating result...");
+        return count * count;
+      }, [count]);
+
+      // useCallback: preserve function reference
+      const handleSkillSelect = useCallback(skill => {
+        setSelectedSkill(skill);
+      }, []);
+
+      const skills = [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React",
+        "Python"
+      ];
+
+      // Event handling and controlled form
+      const handleSubmit = event => {
+        event.preventDefault();
+
+        if (!name.trim() || !email.trim()) {
+          alert("Please enter your name and email.");
+          return;
+        }
+
+        alert(`Form submitted by ${name}`);
+      };
+
+      const focusNameInput = () => {
+        nameInputRef.current.focus();
+      };
+
+      return (
+        <ThemeContext.Provider value={theme}>
+          <section id="about">
+            <h2>About Me</h2>
+
+            <div className="card">
+              <p>
+                I am Swarupa shinde, a second-year student learning
+                React components, forms, event handling and React Hooks.
+              </p>
+              <p>PRN: 25070521131</p>
+            </div>
+          </section>
+
+          <section id="components">
+            <h2>Components and Forms</h2>
+
+            <div className="grid">
+
+              <Card title="Controlled Component Form">
+                <form onSubmit={handleSubmit}>
+                  <label>Name</label>
+
+                  <input
+                    ref={nameInputRef}
+                    value={name}
+                    onChange={event => setName(event.target.value)}
+                    placeholder="Enter your name"
+                  />
+
+                  <label>Email</label>
+
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={event => setEmail(event.target.value)}
+                    placeholder="Enter your email"
+                  />
+
+                  <button type="submit">Submit Form</button>
+                  <button type="button" onClick={focusNameInput}>
+                    Focus Name Input
+                  </button>
+                </form>
+              </Card>
+
+              <Card title="Component Composition">
+                <p>
+                  This Card component receives content through
+                  <strong> children </strong>.
+                </p>
+
+                <p>
+                  The SkillList component is composed inside the App
+                  component.
+                </p>
+              </Card>
+
+              <Card title="Lifting State Up">
+                <p>
+                  Selected skill:
+                  <strong> {selectedSkill}</strong>
+                </p>
+
+                <SkillList
+                  skills={skills}
+                  onSelectSkill={handleSkillSelect}
+                />
+              </Card>
+
+            </div>
+          </section>
+
+          <section id="hooks">
+            <h2>React Hooks Demonstration</h2>
+
+            <div className="grid">
+
+              <Card title="useState">
+                <p>Counter value: {count}</p>
+
+                <button onClick={() => setCount(count + 1)}>
+                  Increase
+                </button>
+
+                <button onClick={() => setCount(count - 1)}>
+                  Decrease
+                </button>
+              </Card>
+
+              <Card title="useRef">
+                <p>
+                  useRef is used to focus the name input without
+                  causing a component re-render.
+                </p>
+
+                <button onClick={focusNameInput}>
+                  Focus Input
+                </button>
+              </Card>
+
+              <Card title="useMemo">
+                <p>
+                  Cached square of counter:
+                  <strong> {expensiveCalculation}</strong>
+                </p>
+
+                <p>
+                  useMemo recalculates this value only when count changes.
+                </p>
+              </Card>
+
+              <Card title="useCallback">
+                <p>
+                  The skill selection function is created using
+                  useCallback and passed to the child component.
+                </p>
+
+                <p>
+                  Selected:
+                  <strong> {selectedSkill}</strong>
+                </p>
+              </Card>
+
+              <Card title="useContext">
+                <p>
+                  Current theme:
+                  <strong> {theme}</strong>
+                </p>
+
+                <button onClick={() => setTheme(
+                  theme === "light" ? "dark" : "light"
+                )}>
+                  Change Theme
+                </button>
+              </Card>
+
+              <Card title="Custom Hook">
+                <label>Save a note in localStorage</label>
+
+                <input
+                  value={savedNote}
+                  onChange={event => setSavedNote(event.target.value)}
+                  placeholder="Write a note..."
+                />
+
+                <p className="success">
+                  Your note is automatically saved in localStorage.
+                </p>
+              </Card>
+
+            </div>
+
+            <div className="output">
+              <strong>Topics Covered:</strong>
+
+              <br />
+              Event handling, forms, controlled components,
+              component composition, lifting state up, useRef,
+              useMemo, useCallback, useContext and custom hooks.
+            </div>
+          </section>
+        </ThemeContext.Provider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(
+      <App />
+    );
+
+  </script>
+</body>
+</html>
